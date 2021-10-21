@@ -10,10 +10,16 @@ local Players = game.Players;
 local LocalPlayer = Players.LocalPlayer;
 local Mouse = LocalPlayer:GetMouse();
 
+-- types
+
+type ObjectTypes = {Instance}
+
 
 local Library = {};
 local Page = {};
 local Utility = {};
+
+local Object: ObjectTypes = {};
 
 Library.__index = Library;
 Page.__index = Page;
@@ -53,6 +59,10 @@ function Utility:Create(instance: string, properties, child): Instance
 
     for i,v in pairs (child or {}) do
        v.Parent = Instance
+    end
+
+    if (Instance.Name ~= "Extra" and Instance.Name ~= "Colorpicker") then
+        table.insert(Object, Instance);
     end
 
     return Instance
@@ -331,6 +341,14 @@ function Library:moveToolTip(text: string, x, y)
 
         tooltip.Visible = false;
     end)
+end
+
+function Library:setTheme(type: string, property: string, color: Color3)
+    for i,v in pairs (Object) do
+        if (v.ClassName:lower() == type:lower()) then
+            v[property] = color;
+        end
+    end
 end
 
 -- luau type is something strange
