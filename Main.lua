@@ -24,7 +24,7 @@ local Object: ObjectTypes = {};
 Library.__index = Library;
 Page.__index = Page;
 
-function TypeChecker(value: string, type: string | table | number): boolean
+function TypeChecker(value: string, type: string): boolean
     return typeof(value) == type;
 end
 
@@ -343,10 +343,10 @@ function Library:moveToolTip(text: string, x, y)
     end)
 end
 
-function Library:setTheme(type: string, property: string, color: Color3)
+function Library:setTheme(type: string, property: string, color: table)
     for i,v in pairs (Object) do
         if (v.ClassName:lower() == type:lower()) then
-            v[property] = color;
+            v[property] = Color3.fromRGB(color.r, color.g, color.b);
         end
     end
 end
@@ -462,10 +462,6 @@ function Page:Resize(scroll)
     if (scroll) then
         Utility:Tween(self.container, { CanvasPosition = self.lastposition or Vector2.new(0, 0)}, .3);
     end
-end
-
-function Library:setTheme(ObjectType: string, color: Color3)
-
 end
 
 function Page:addButton(Title: string, ButtonText: string, description: string?, callback: Function)
@@ -1157,20 +1153,20 @@ function Page:addColorpicker(Title: string, description: string, default: Color3
 
             local res = Utility:HsvToRgb(unpack(color));
 
-            callback(Color3.new(res.r,res.g,res.b));
+            callback(res);
         end
 
         if SVDown then
             local X = math.clamp((Mouse.X - SV.AbsolutePosition.X) / SV.AbsoluteSize.X,0,1);
             local Y = math.clamp((Mouse.Y - SV.AbsolutePosition.Y) / SV.AbsoluteSize.Y,0,1);
 
-            color = {color[1], X, Y};
+            color = {color[1], X, 1 - Y};
 
             self:UpdateColorpicker(Container, color, nil);
 
             local res = Utility:HsvToRgb(unpack(color));
 
-            callback(Color3.new(res.r,res.g,res.b));
+            callback(res);
         end
 
         RunService.RenderStepped:Wait()
@@ -1210,9 +1206,9 @@ function Page:UpdateColorpicker(Colorpicker, color, active)
                 h,s,v = Color3.toHSV(color3)
             end
 
-            Utility:Tween(Colorpicker.Inner.Preview ,{ ImageColor3 = Color3.fromHSV(h,s,1 - v) }, 0.2);
+            Utility:Tween(Colorpicker.Inner.Preview ,{ ImageColor3 = Color3.fromHSV(h, s, v) }, 0.2);
             Utility:Tween(HueMover,{Position = UDim2.new(0.23, 0, h, 0)}, 0.2);
-            Utility:Tween(SVMover,{Position = UDim2.new(s, 0, v, 0)}, 0.2);
+            Utility:Tween(SVMover,{Position = UDim2.new(s, 0, math.abs(v - 1), 0)}, 0.2);
             Utility:Tween(SV,{BackgroundColor3 = Color3.fromHSV(h, 1, 1)}, 0.2);
         end
     end
